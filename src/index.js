@@ -1,4 +1,4 @@
-import './style.css'
+import './index.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { ConvexGeometry } from 'three/examples/jsm/geometries/ConvexGeometry.js'
@@ -50,31 +50,19 @@ const init = () => {
 
 const generatePoints = () => {
     var points = [];
-    // for (var i = 0; i < 10000; i++) {
-    //     var randomX = -10 + Math.round(Math.random() * 20);
-    //     var randomY = -10 + Math.round(Math.random() * 20);
-    //     var randomZ = -10 + Math.round(Math.random() * 20);
-    //     if((Math.pow(randomX,2) + Math.pow(randomY,2) + Math.pow(randomZ,2)) <= 100){
-    //         points.push(new THREE.Vector3(randomX, randomY, randomZ));
-    //     }    
-    // }
 
-    var kugisR = 10;
-
-    var kugisH = 30;
+    var coneR = 10;
+    var coneH = 30;
 
     for (var i = 0; i < 10000; i++) {
         var randomX = -10 + Math.round(Math.random() * 20);
         var randomY = -10 + Math.round(Math.random() * 20);
         var randomZ = -10 + Math.round(Math.random() * 20);
 
-        var dalikliai = (Math.pow(kugisR, 2) / Math.pow(kugisH, 2));
-        var daugiklis = Math.pow((randomY - kugisH / 2), 2);
+        var coneEquation1 = Math.pow(randomX,2) - (Math.pow(coneR, 2) / Math.pow(coneH, 2)) * Math.pow((randomY - coneH / 2), 2) + Math.pow(randomZ, 2) <= 0;
+        var coneEquation2 = -coneH / 2 <= randomY <= coneH / 2;
 
-        var maziauUz0 = Math.pow(randomX,2) - dalikliai * daugiklis + Math.pow(randomZ, 2)
-
-        if (maziauUz0 <= 0
-            && -kugisH / 2 <= randomY <= kugisH / 2) {
+        if (coneEquation1 && coneEquation2){
             points.push(new THREE.Vector3(randomX, randomY, randomZ));
         }
     }
