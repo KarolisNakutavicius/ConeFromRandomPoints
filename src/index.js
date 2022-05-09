@@ -22,7 +22,7 @@ const init = () => {
     controls.enableDamping = true
     
     renderer = new THREE.WebGLRenderer({ canvas: canvas })
-    renderer.setClearColor(0xD85A7FFF, 1)
+    renderer.setClearColor(0xd2b48c, 1)
     renderer.setSize(window.innerWidth, window.innerHeight)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     
@@ -40,77 +40,87 @@ const init = () => {
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     })
 
-    stats = new Stats();
-    stats.setMode(0);
-    stats.domElement.style.position = 'absolute';
-    stats.domElement.style.left = '0px';
-    stats.domElement.style.top = '0px';
-    document.getElementById("Stats-output").append(stats.domElement);
-}
-
-const generatePoints = () => {
-    var points = [];
-
-    var coneR = 10;
-    var coneH = 30;
-
-    for (var i = 0; i < 10000; i++) {
-        var randomX = -10 + Math.round(Math.random() * 20);
-        var randomY = -10 + Math.round(Math.random() * 20);
-        var randomZ = -10 + Math.round(Math.random() * 20);
-
-        var coneEquation1 = Math.pow(randomX,2) - (Math.pow(coneR, 2) / Math.pow(coneH, 2)) * Math.pow((randomY - coneH / 2), 2) + Math.pow(randomZ, 2) <= 0;
-        var coneEquation2 = -coneH / 2 <= randomY <= coneH / 2;
-
-        if (coneEquation1 && coneEquation2){
-            points.push(new THREE.Vector3(randomX, randomY, randomZ));
-        }
-    }
-
-    var pointsGroup = new THREE.Object3D();
-    var pointMaterial = new THREE.MeshBasicMaterial();
-    var pointGeometry = new THREE.SphereGeometry(0.2);
-
-    points.forEach(function (point) {
-        var pointMesh = new THREE.Mesh(pointGeometry, pointMaterial);
-        pointMesh.position.set(point.x, point.y, point.z);
-        pointsGroup.add(pointMesh);
-    });
-
-    scene.add(pointsGroup);
-
-    var hullGeometry = new ConvexGeometry(points);
-    var vertices = hullGeometry.getAttribute("position").array
-
-    var uvs = []
-    for( var i = 0; i<vertices.length; i += 3){
-        var u = Math.atan2(vertices[i],vertices[i+2]) / (2*Math.PI) + 0.5;
-        var v = 0.5 - (vertices[i+1])/20 ;
-        uvs.push(...[u,v])
-    }
-
-    hullGeometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), 2));
-    var hullMesh = createMesh(hullGeometry);
-    scene.add(hullMesh);
+    setStats()
 }
 
 const createMesh = (hullGeometry) => {
     var chessTexture = new THREE.TextureLoader().load( texture );
-    var mappedChessMaterial = new THREE.MeshBasicMaterial( {map : chessTexture , transparent: true, opacity: 0.5} )
+    var mappedChessMaterial = new THREE.MeshBasicMaterial( {map : chessTexture , transparent: true, opacity: 0.7} )
     var wireFrameMat = new THREE.MeshBasicMaterial({color: 'black', wireframe: true });
     
     return SceneUtils.createMultiMaterialObject(hullGeometry, [mappedChessMaterial, wireFrameMat]);
 }
 
 
-const tick = () =>
-{
+init();
+setStats()
+var points = generatePoints();
+WrapInConvex(points);
+animate();
+
+
+function setStats() {
+    stats = new Stats()
+    stats.setMode(0)
+    stats.domElement.style.position = 'absolute'
+    stats.domElement.style.left = '0px'
+    stats.domElement.style.top = '0px'
+    document.getElementById("Stats-output").append(stats.domElement)
+}
+
+function animate(){
     stats.update();
     renderer.render(scene, camera)
     
-    window.requestAnimationFrame(tick)
+    window.requestAnimationFrame(animate)
 }
 
-init();
-generatePoints();
-tick();
+function generatePoints() {
+    var points = [];
+
+    var coneR = 10;
+    var coneH = 30;
+
+    for (var i = 0; i < 10000; i++) {
+        var X = -10 + Math.round(Math.random() * 20);
+        var Y = -10 + Math.round(Math.random() * 20);
+        var Z = -10 + Math.round(Math.random() * 20);
+
+        var coneEquation1 = Math.pow(X,2) - (Math.pow(coneR, 2) / Math.pow(coneH, 2)) * Math.pow((Y - coneH / 2), 2) + Math.pow(Z, 2) <= 0;
+        var coneEquation2 = -coneH / 2 <= Y <= coneH / 2;
+
+        if (coneEquation1 && coneEquation2){
+            points.push(new THREE.Vector3(X, Y, Z));
+        }
+    }
+
+    var pointObject = new THREE.Object3D();
+    var pointMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true });
+    var pointGeometry = new THREE.SphereGeometry(0.2);
+
+    points.forEach(function (point) {
+        var pointMesh = new THREE.Mesh(pointGeometry, pointMaterial);
+        pointMesh.position.set(point.x, point.y, point.z);
+        pointObject.add(pointMesh);
+    });
+
+    scene.add(pointObject);
+
+    return points;
+}
+
+function WrapInConvex(points) {
+    var hullGeometry = new ConvexGeometry(points)
+    var vertices = hullGeometry.getAttribute("position").array
+
+    var uvs = []
+    for (var i = 0; i < vertices.length; i += 3) {
+        var u = Math.atan2(vertices[i], vertices[i + 2]) / (2 * Math.PI) + 0.5
+        var v = 0.5 - (vertices[i + 1]) / 20
+        uvs.push(...[u, v])
+    }
+
+    hullGeometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), 2))
+    var hullMesh = createMesh(hullGeometry)
+    scene.add(hullMesh)
+}
