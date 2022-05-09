@@ -6,6 +6,9 @@ import { SceneUtils } from 'three/examples/jsm/utils/SceneUtils.js'
 import chessTexture from './chess-texture.jpg'
 import Stats from 'stats-js'
 
+const coneR = 10;
+const coneH = 21;
+
 //Scene setup
 var scene = new THREE.Scene()
 var camera = initCamera()
@@ -67,13 +70,16 @@ function animate() {
 function generatePoints() {
     var points = [];
 
-    var coneR = 10;
-    var coneH = 21;
-
-    for (var i = 0; i < 10000; i++) {
-        var X = -10 + Math.round(Math.random() * 20);
-        var Y = -10 + Math.round(Math.random() * 20);
-        var Z = -10 + Math.round(Math.random() * 20);
+    for (var i = 0; i < 1000; i++) {
+        // var randomX = -10 + Math.round(Math.random() * 20);
+        // var randomY = -10 + Math.round(Math.random() * 20);
+        // var randomZ = -10 + Math.round(Math.random() * 20);
+        // if((Math.pow(randomX,2) + Math.pow(randomY,2) + Math.pow(randomZ,2)) <= 100){
+        //     points.push(new THREE.Vector3(randomX, randomY, randomZ));
+        // }    
+        var X = -10 + Math.round(Math.random() * 21);
+        var Y = -10 + Math.round(Math.random() * 21);
+        var Z = -10 + Math.round(Math.random() * 21);
 
         var coneEquation1 = Math.pow(X, 2) - (Math.pow(coneR, 2) / Math.pow(coneH, 2)) * Math.pow((Y - coneH / 2), 2) + Math.pow(Z, 2) <= 0;
         var coneEquation2 = -coneH / 2 <= Y <= coneH / 2;
@@ -102,10 +108,21 @@ function WrapInConvex(points) {
     var hullGeometry = new ConvexGeometry(points)
     var vertices = hullGeometry.getAttribute("position").array
 
+// kiekvienoje viršuneje reikia suskaičiuoti UV koordinate
+
     var uvs = []
     for (var i = 0; i < vertices.length; i += 3) {
-        var u = Math.atan2(vertices[i], vertices[i + 2]) / (2 * Math.PI) + 0.5
-        var v = 0.5 - (vertices[i + 1]) / 20
+
+        let x = vertices[i];
+        let y = vertices[i + 1]
+        let z = vertices[i + 2]
+        
+        // var v = (y + coneH / 2) / coneH
+        var v = (y + coneH / 2) / coneH
+        var u = Math.atan2(x, z) / (2 * Math.PI) + 0.5;
+
+        // var u = Math.atan2(x, z) / (2 * Math.PI) + 0.5
+        // var v = 0.5 - y / 20
         uvs.push(...[u, v])
     }
 
