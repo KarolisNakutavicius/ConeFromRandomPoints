@@ -6,33 +6,16 @@ import { SceneUtils } from 'three/examples/jsm/utils/SceneUtils.js'
 import texture from './chess-texture.jpg'
 import Stats from 'stats-js'
     
-var renderer;
-
 const init = () => {
-
-    const canvas = document.querySelector('canvas.webgl')
     
-    const controls = new OrbitControls(camera, canvas)
-    controls.enableDamping = true
-    
-    renderer = new THREE.WebGLRenderer({ canvas: canvas })
-    renderer.setClearColor(0xd2b48c, 1)
-    renderer.setSize(window.innerWidth, window.innerHeight)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-    
-    const spotLight = new THREE.SpotLight(0xffffff);
-    spotLight.position.set(50, 100, 50);
-    spotLight.castShadow = true;
-    scene.add(spotLight);
-    
-    window.addEventListener('resize', () =>
-    {
-        camera.aspect = window.innerWidth / window.innerHeight
-        camera.updateProjectionMatrix()
+    // window.addEventListener('resize', () =>
+    // {
+    //     camera.aspect = window.innerWidth / window.innerHeight
+    //     camera.updateProjectionMatrix()
         
-        renderer.setSize(window.innerWidth, window.innerHeight)
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-    })
+    //     renderer.setSize(window.innerWidth, window.innerHeight)
+    //     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    // })
 }
 
 const createMesh = (hullGeometry) => {
@@ -45,12 +28,37 @@ const createMesh = (hullGeometry) => {
 
 var scene = new THREE.Scene()
 var camera = initCamera()
-init();
+const canvas = document.querySelector('canvas.webgl')    
+const controls = new OrbitControls(camera, canvas)
+controls.enableDamping = true;
+
+var renderer = initRenderer()
+
+initSpotlight()
+
+
 var stats = setStats()
+
 var points = generatePoints();
 WrapInConvex(points);
 animate();
 
+
+function initSpotlight() {
+    const spotLight = new THREE.SpotLight(0xffffff)
+    spotLight.position.set(50, 100, 50)
+    spotLight.castShadow = true
+    scene.add(spotLight)
+}
+
+function initRenderer() {
+    var renderer = new THREE.WebGLRenderer({ canvas: canvas })
+    renderer.setClearColor(0xd2b48c, 1)
+    renderer.setSize(window.innerWidth, window.innerHeight)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+
+    return renderer;
+}
 
 function initCamera() {
     var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000)
