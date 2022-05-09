@@ -68,7 +68,7 @@ function generatePoints() {
     var points = [];
 
     var coneR = 10;
-    var coneH = 30;
+    var coneH = 21;
 
     for (var i = 0; i < 10000; i++) {
         var X = -10 + Math.round(Math.random() * 20);
