@@ -6,17 +6,11 @@ import { SceneUtils } from 'three/examples/jsm/utils/SceneUtils.js'
 import texture from './chess-texture.jpg'
 import Stats from 'stats-js'
     
-var scene, renderer, camera, stats;
+var renderer;
 
 const init = () => {
-    scene = new THREE.Scene()
+
     const canvas = document.querySelector('canvas.webgl')
-    
-    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000)
-    camera.position.x = 30;
-    camera.position.y = 40;
-    camera.position.z = 30;
-    scene.add(camera)
     
     const controls = new OrbitControls(camera, canvas)
     controls.enableDamping = true
@@ -39,8 +33,6 @@ const init = () => {
         renderer.setSize(window.innerWidth, window.innerHeight)
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     })
-
-    setStats()
 }
 
 const createMesh = (hullGeometry) => {
@@ -51,21 +43,34 @@ const createMesh = (hullGeometry) => {
     return SceneUtils.createMultiMaterialObject(hullGeometry, [mappedChessMaterial, wireFrameMat]);
 }
 
-
+var scene = new THREE.Scene()
+var camera = initCamera()
 init();
-setStats()
+var stats = setStats()
 var points = generatePoints();
 WrapInConvex(points);
 animate();
 
 
+function initCamera() {
+    var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000)
+    camera.position.x = 30
+    camera.position.y = 40
+    camera.position.z = 30
+    scene.add(camera)
+
+    return camera;
+}
+
 function setStats() {
-    stats = new Stats()
+    var stats = new Stats()
     stats.setMode(0)
     stats.domElement.style.position = 'absolute'
     stats.domElement.style.left = '0px'
     stats.domElement.style.top = '0px'
     document.getElementById("Stats-output").append(stats.domElement)
+
+    return stats;
 }
 
 function animate(){
