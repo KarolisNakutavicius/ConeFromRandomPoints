@@ -3,46 +3,22 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { ConvexGeometry } from 'three/examples/jsm/geometries/ConvexGeometry.js'
 import { SceneUtils } from 'three/examples/jsm/utils/SceneUtils.js'
-import texture from './chess-texture.jpg'
+import chessTexture from './chess-texture.jpg'
 import Stats from 'stats-js'
-    
-const init = () => {
-    
-    // window.addEventListener('resize', () =>
-    // {
-    //     camera.aspect = window.innerWidth / window.innerHeight
-    //     camera.updateProjectionMatrix()
-        
-    //     renderer.setSize(window.innerWidth, window.innerHeight)
-    //     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-    // })
-}
 
-const createMesh = (hullGeometry) => {
-    var chessTexture = new THREE.TextureLoader().load( texture );
-    var mappedChessMaterial = new THREE.MeshBasicMaterial( {map : chessTexture , transparent: true, opacity: 0.7} )
-    var wireFrameMat = new THREE.MeshBasicMaterial({color: 'black', wireframe: true });
-    
-    return SceneUtils.createMultiMaterialObject(hullGeometry, [mappedChessMaterial, wireFrameMat]);
-}
-
+//Scene setup
 var scene = new THREE.Scene()
 var camera = initCamera()
-const canvas = document.querySelector('canvas.webgl')    
-const controls = new OrbitControls(camera, canvas)
+var canvas = document.querySelector('canvas.webgl')
+var controls = new OrbitControls(camera, canvas)
 controls.enableDamping = true;
-
 var renderer = initRenderer()
-
 initSpotlight()
-
-
 var stats = setStats()
 
 var points = generatePoints();
 WrapInConvex(points);
 animate();
-
 
 function initSpotlight() {
     const spotLight = new THREE.SpotLight(0xffffff)
@@ -81,10 +57,10 @@ function setStats() {
     return stats;
 }
 
-function animate(){
+function animate() {
     stats.update();
     renderer.render(scene, camera)
-    
+
     window.requestAnimationFrame(animate)
 }
 
@@ -99,10 +75,10 @@ function generatePoints() {
         var Y = -10 + Math.round(Math.random() * 20);
         var Z = -10 + Math.round(Math.random() * 20);
 
-        var coneEquation1 = Math.pow(X,2) - (Math.pow(coneR, 2) / Math.pow(coneH, 2)) * Math.pow((Y - coneH / 2), 2) + Math.pow(Z, 2) <= 0;
+        var coneEquation1 = Math.pow(X, 2) - (Math.pow(coneR, 2) / Math.pow(coneH, 2)) * Math.pow((Y - coneH / 2), 2) + Math.pow(Z, 2) <= 0;
         var coneEquation2 = -coneH / 2 <= Y <= coneH / 2;
 
-        if (coneEquation1 && coneEquation2){
+        if (coneEquation1 && coneEquation2) {
             points.push(new THREE.Vector3(X, Y, Z));
         }
     }
@@ -134,6 +110,14 @@ function WrapInConvex(points) {
     }
 
     hullGeometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), 2))
-    var hullMesh = createMesh(hullGeometry)
+    var hullMesh = generateMesh(hullGeometry)
     scene.add(hullMesh)
+}
+
+function generateMesh(hullGeometry) {
+    var texture = new THREE.TextureLoader().load(chessTexture);
+    var material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, opacity: 0.7 })
+    var wireFrameMaterial = new THREE.MeshBasicMaterial({ color: 'black', wireframe: true });
+
+    return SceneUtils.createMultiMaterialObject(hullGeometry, [material, wireFrameMaterial]);
 }
